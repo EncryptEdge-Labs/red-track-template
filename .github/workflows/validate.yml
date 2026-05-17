@@ -1,0 +1,23 @@
+name: Submission Validator
+on: [push, pull_request]
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check required folders exist
+        run: |
+          for dir in findings diagrams screenshots evidence remediation appendix; do
+            [ -d "$dir" ] || (echo "MISSING FOLDER: $dir/" && exit 1)
+          done
+
+      - name: Check README has required sections
+        run: |
+          for sec in "Executive Summary" "Scope" "Methodology" "Findings Summary" "Loom Walkthrough"; do
+            grep -q "## $sec" README.md || (echo "MISSING SECTION: $sec" && exit 1)
+          done
+
+      - name: Check Loom link exists
+        run: |
+          grep -q "loom.com" README.md || (echo "ERROR: No Loom walkthrough link found in README" && exit 1)
